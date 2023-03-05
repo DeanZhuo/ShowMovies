@@ -1,14 +1,10 @@
 ﻿using ShowMovies.Services;
-using ShowMovies.Views;
-using System;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 
 namespace ShowMovies
 {
     public partial class App : Application
     {
-
         public App()
         {
             InitializeComponent();

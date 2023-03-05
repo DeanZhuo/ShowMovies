@@ -1,15 +1,22 @@
 ﻿using ShowMovies.ViewModels;
-using System.ComponentModel;
 using Xamarin.Forms;
 
 namespace ShowMovies.Views
 {
     public partial class ItemDetailPage : ContentPage
     {
+        private ItemDetailViewModel _viewModel;
+
         public ItemDetailPage()
         {
             InitializeComponent();
-            BindingContext = new ItemDetailViewModel();
+            BindingContext = _viewModel = new ItemDetailViewModel();
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            _viewModel.OnAppearing();
         }
     }
 }

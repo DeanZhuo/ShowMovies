@@ -1,57 +1,90 @@
 ﻿using ShowMovies.Models;
+using ShowMovies.Views;
 using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace ShowMovies.ViewModels
 {
-    [QueryProperty(nameof(ItemId), nameof(ItemId))]
+    [QueryProperty(nameof(GenreName), nameof(GenreName))]
     public class ItemDetailViewModel : BaseViewModel
     {
-        private string itemId;
-        private string text;
-        private string description;
-        public string Id { get; set; }
+        private string genreName;
 
-        public string Text
-        {
-            get => text;
-            set => SetProperty(ref text, value);
-        }
-
-        public string Description
-        {
-            get => description;
-            set => SetProperty(ref description, value);
-        }
-
-        public string ItemId
+        public string GenreName
         {
             get
             {
-                return itemId;
+                return genreName;
             }
             set
             {
-                itemId = value;
-                LoadItemId(value);
+                genreName = value;
             }
         }
 
-        public async void LoadItemId(string itemId)
+        public Command LoadItemsCommand { get; }
+        public Command<Movie> ItemTapped { get; }
+        public ObservableCollection<Movie> Movies { get; }
+
+        public ItemDetailViewModel()
         {
+            Movies = new ObservableCollection<Movie>();
+            LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
+
+            ItemTapped = new Command<Movie>(OnItemSelected);
+        }
+
+        private async Task ExecuteLoadItemsCommand()
+        {
+            IsBusy = true;
+
             try
             {
-                var item = await DataStore.GetItemAsync(itemId);
-                Id = item.Id;
-                Text = item.Text;
-                Description = item.Description;
+                Movies.Clear();
+                var items = await DataStore.GetMovieByGenreAsync(GenreName);
+                foreach (var item in items)
+                {
+                    Movies.Add(item);
+                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Debug.WriteLine("Failed to Load Item");
+                Debug.WriteLine(ex);
             }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        public void OnAppearing()
+        {
+            IsBusy = true;
+            SelectedItem = null;
+        }
+
+        private Movie _selectedMovie;
+
+        public Movie SelectedItem
+        {
+            get => _selectedMovie;
+            set
+            {
+                SetProperty(ref _selectedMovie, value);
+                OnItemSelected(value);
+            }
+        }
+
+        private async void OnItemSelected(Movie item)
+        {
+            if (item == null)
+                return;
+
+            // This will push the MovieDetailPage onto the navigation stack
+            await Shell.Current.GoToAsync($"{nameof(MovieDetailPage)}?{nameof(MovieDetailViewModel.MovieId)}={item.id}");
         }
     }
 }

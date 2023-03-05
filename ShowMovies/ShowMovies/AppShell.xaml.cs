@@ -1,7 +1,4 @@
-﻿using ShowMovies.ViewModels;
-using ShowMovies.Views;
-using System;
-using System.Collections.Generic;
+﻿using ShowMovies.Views;
 using Xamarin.Forms;
 
 namespace ShowMovies
@@ -12,8 +9,7 @@ namespace ShowMovies
         {
             InitializeComponent();
             Routing.RegisterRoute(nameof(ItemDetailPage), typeof(ItemDetailPage));
-            Routing.RegisterRoute(nameof(NewItemPage), typeof(NewItemPage));
+            Routing.RegisterRoute(nameof(MovieDetailPage), typeof(MovieDetailPage));
         }
-
     }
 }

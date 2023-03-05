@@ -10,35 +10,33 @@ namespace ShowMovies.ViewModels
 {
     public class ItemsViewModel : BaseViewModel
     {
-        private Item _selectedItem;
+        private Genre _selectedGenre;
 
-        public ObservableCollection<Item> Items { get; }
+        public ObservableCollection<Genre> Items { get; }
         public Command LoadItemsCommand { get; }
-        public Command AddItemCommand { get; }
-        public Command<Item> ItemTapped { get; }
+        public Command<Genre> ItemTapped { get; }
 
         public ItemsViewModel()
         {
-            Title = "Browse";
-            Items = new ObservableCollection<Item>();
+            Title = "Browse Genre";
+            Items = new ObservableCollection<Genre>();
             LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
 
-            ItemTapped = new Command<Item>(OnItemSelected);
-
-            AddItemCommand = new Command(OnAddItem);
+            ItemTapped = new Command<Genre>(OnItemSelected);
         }
 
-        async Task ExecuteLoadItemsCommand()
+        private async Task ExecuteLoadItemsCommand()
         {
             IsBusy = true;
 
             try
             {
                 Items.Clear();
-                var items = await DataStore.GetItemsAsync(true);
+                var items = await DataStore.GetItemAsync();
                 foreach (var item in items)
                 {
                     Items.Add(item);
+                    Debug.WriteLine(item.name);
                 }
             }
             catch (Exception ex)
@@ -57,28 +55,23 @@ namespace ShowMovies.ViewModels
             SelectedItem = null;
         }
 
-        public Item SelectedItem
+        public Genre SelectedItem
         {
-            get => _selectedItem;
+            get => _selectedGenre;
             set
             {
-                SetProperty(ref _selectedItem, value);
+                SetProperty(ref _selectedGenre, value);
                 OnItemSelected(value);
             }
         }
 
-        private async void OnAddItem(object obj)
-        {
-            await Shell.Current.GoToAsync(nameof(NewItemPage));
-        }
-
-        async void OnItemSelected(Item item)
+        private async void OnItemSelected(Genre item)
         {
             if (item == null)
                 return;
 
             // This will push the ItemDetailPage onto the navigation stack
-            await Shell.Current.GoToAsync($"{nameof(ItemDetailPage)}?{nameof(ItemDetailViewModel.ItemId)}={item.Id}");
+            await Shell.Current.GoToAsync($"{nameof(ItemDetailPage)}?{nameof(ItemDetailViewModel.GenreName)}={item.name}");
         }
     }
 }
