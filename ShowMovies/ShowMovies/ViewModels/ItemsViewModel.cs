@@ -71,7 +71,7 @@ namespace ShowMovies.ViewModels
                 return;
 
             // This will push the ItemDetailPage onto the navigation stack
-            await Shell.Current.GoToAsync($"{nameof(ItemDetailPage)}?{nameof(ItemDetailViewModel.GenreName)}={item.name}");
+            await Shell.Current.GoToAsync($"{nameof(ItemDetailPage)}?{nameof(ItemDetailViewModel.SelectedGenre)}={item.id}");
         }
     }
 }

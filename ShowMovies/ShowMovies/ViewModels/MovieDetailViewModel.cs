@@ -3,7 +3,10 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Xamarin.CommunityToolkit.Core;
 using Xamarin.Forms;
+using YoutubeExplode.Videos.Streams;
+using YoutubeExplode;
 
 namespace ShowMovies.ViewModels
 {
@@ -47,11 +50,17 @@ namespace ShowMovies.ViewModels
             {
                 movie = await DataStore.GetMovie(MovieId);
                 Debug.WriteLine("Movie item:" + movie.title);
-
+                string YoutubeUrl = await DataStore.GetTrailerUrl(MovieId);
+                if (!string.IsNullOrEmpty(YoutubeUrl))
+                {
+                    ShowTrailer = true;
+                    TrailerMessage = "YouTube Trailer:";
+                    GetVideoContent(YoutubeUrl);
+                }
                 DisplayDetail(movie);
 
                 Reviews.Clear();
-                var userReviews = await DataStore.GetMovieReviewsAsync(MovieId);
+                var userReviews = await DataStore.GetMovieReviewsAsync(MovieId);///////////////////////////////////////
                 foreach (var item in userReviews)
                 {
                     Reviews.Add(item);
@@ -65,6 +74,18 @@ namespace ShowMovies.ViewModels
             {
                 IsBusy = false;
             }
+        }
+
+        private async void GetVideoContent(string youtubeUrl)
+        {
+            YoutubeClient youtube = new();
+            StreamManifest streamManifest = await youtube.Videos.Streams.GetManifestAsync(youtubeUrl);
+            IVideoStreamInfo streamInfo = streamManifest.GetMuxedStreams().GetWithHighestVideoQuality();
+            if (streamInfo != null)
+            {
+                VideoUrl = streamInfo.Url;
+            }
+
         }
 
         private void DisplayDetail(Movie movie)
@@ -84,12 +105,35 @@ namespace ShowMovies.ViewModels
             Language = "Language: " + movie.original_language;
         }
 
+        private string trailerMessage = "There's no trailer available.";
+
+        public string TrailerMessage
+        {
+            get { return trailerMessage; }
+            set { SetProperty(ref trailerMessage, value); }
+        }
         private string imageUrl;
 
         public string ImageUrl
         {
             get { return imageUrl; }
             set { SetProperty(ref imageUrl, value); }
+        }
+
+        private bool showTrailer = false;
+
+        public bool ShowTrailer
+        {
+            get { return showTrailer; }
+            set { SetProperty(ref showTrailer, value); }
+        }
+
+        private string videoUrl;
+
+        public string VideoUrl
+        {
+            get { return videoUrl; }
+            set { SetProperty(ref videoUrl, value); }
         }
 
         private string vote;

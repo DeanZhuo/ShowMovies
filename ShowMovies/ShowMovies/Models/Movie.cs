@@ -17,7 +17,7 @@ namespace ShowMovies.Models
         public string original_title { get; set; }
         public string overview { get; set; }
         public float popularity { get; set; }
-        public object poster_path { get; set; }
+        public string poster_path { get; set; }
         public Production_Companies[] production_companies { get; set; }
         public Production_Countries[] production_countries { get; set; }
         public string release_date { get; set; }
@@ -79,5 +79,19 @@ namespace ShowMovies.Models
 
         [JsonIgnore]
         public int? rating { get; set; }
+    }
+
+    public class Video
+    {
+        public string iso_639_1 { get; set; }
+        public string iso_3166_1 { get; set; }
+        public string name { get; set; }
+        public string key { get; set; }
+        public string site { get; set; }
+        public int size { get; set; }
+        public string type { get; set; }
+        public bool official { get; set; }
+        public DateTime published_at { get; set; }
+        public string id { get; set; }
     }
 }

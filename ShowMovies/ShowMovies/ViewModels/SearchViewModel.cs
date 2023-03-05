@@ -12,6 +12,10 @@ namespace ShowMovies.ViewModels
     {
         public Command<Movie> ItemTapped { get; }
         public Command<string> SearchCommand { get; }
+        public Command LoadMoreCommand { get; }
+        private int page;
+        private int lastPage;
+        private string keyword;
         public ObservableCollection<Movie> Movies { get; }
 
         public SearchViewModel()
@@ -20,18 +24,51 @@ namespace ShowMovies.ViewModels
             Movies = new ObservableCollection<Movie>();
             ItemTapped = new Command<Movie>(OnItemSelected);
             SearchCommand = new Command<string>(async (p) => await PerformSearch(p));
+            LoadMoreCommand = new Command(async () => await LoadMoreMovie());
         }
 
-        private async Task PerformSearch(string keyword)
+        private async Task LoadMoreMovie()
+        {
+            try
+            {
+                page += 1;
+                if (page > lastPage)
+                    return;
+
+                var result = await DataStore.GetMovieAsync(keyword, page);
+                foreach (var item in result.results)
+                {
+                    if (!string.IsNullOrEmpty(item.poster_path))
+                    {
+                        item.poster_path = "https://image.tmdb.org/t/p/w200" + item.poster_path;
+                    }
+                    Movies.Add(item);
+                }
+                Debug.WriteLine($"finished loading page {page} out of {lastPage}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+        }
+
+        private async Task PerformSearch(string searchKey)
         {
             IsBusy = true;
 
             try
             {
                 Movies.Clear();
-                var items = await DataStore.GetMovieAsync(keyword);
-                foreach (var item in items)
+                page = 1;
+                keyword = searchKey;
+                var result = await DataStore.GetMovieAsync(keyword, page);
+                lastPage = result.total_pages;
+                foreach (var item in result.results)
                 {
+                    if (!string.IsNullOrEmpty(item.poster_path))
+                    {
+                        item.poster_path = "https://image.tmdb.org/t/p/w200" + item.poster_path;
+                    }
                     Movies.Add(item);
                 }
             }

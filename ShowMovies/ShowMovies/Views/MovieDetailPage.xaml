@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:xct="clr-namespace:Xamarin.CommunityToolkit.UI.Views;assembly=Xamarin.CommunityToolkit"
              xmlns:model="clr-namespace:ShowMovies.Models"
              xmlns:local="clr-namespace:ShowMovies.ViewModels"
              x:Class="ShowMovies.Views.MovieDetailPage"
@@ -18,6 +19,12 @@
                     <Label Text="{Binding Overview}" FontSize="16" />
                     <Label Text="{Binding OriginalTitle}" FontSize="16" />
                     <Label Text="{Binding ReleasedDate}" FontSize="16" />
+                    <Label Text="{Binding TrailerMessage}" FontSize="16" />
+                    <xct:MediaElement Source="{Binding VideoUrl}"
+                                      AutoPlay="False"
+                                      ShowsPlaybackControls="True"
+                            HeightRequest="200"
+                            IsVisible="{Binding ShowTrailer}" />
                     <Label Text="Reviews" FontSize="Large" FontAttributes="Bold" TextColor="{StaticResource Tertiary}" Margin="10" />
                     <CollectionView ItemsSource="{Binding Reviews}" SelectionMode="None">
                         <CollectionView.EmptyView>

@@ -21,4 +21,10 @@
         public int total_pages { get; set; }
         public int total_results { get; set; }
     }
+
+    public class VideoResult
+    {
+        public int id { get; set; }
+        public Video[] results { get; set; }
+    }
 }

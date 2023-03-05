@@ -6,14 +6,18 @@ namespace ShowMovies.Services
 {
     public interface IDataStore
     {
+        List<Genre> Genres { get; set; }
+
         Task<List<Genre>> GetItemAsync();
 
         Task<Movie> GetMovie(int id);
 
-        Task<List<Movie>> GetMovieAsync(string searchkey);
+        Task<MovieResult> GetMovieAsync(string searchkey, int page);
+
+        Task<string> GetTrailerUrl(int id);
 
         Task<List<UserReviews>> GetMovieReviewsAsync(int id);
 
-        Task<List<Movie>> GetMovieByGenreAsync(string genrekey);
+        Task<MovieResult> GetMovieByGenreAsync(int genrekey, int page);
     }
 }

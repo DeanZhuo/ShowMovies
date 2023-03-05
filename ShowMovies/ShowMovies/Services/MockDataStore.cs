@@ -18,6 +18,7 @@ namespace ShowMovies.Services
         private const string APIHEADER = "?api_key=" + APIKEY + "&language=en-US";
 
         private HttpClient client;
+        public List<Genre> Genres { get; set; } = new();
 
         public MockDataStore()
         {
@@ -26,7 +27,10 @@ namespace ShowMovies.Services
 
         public async Task<List<Genre>> GetItemAsync()
         {
-            List<Genre> Items = new();
+            if (Genres.Count > 0)
+                return Genres;
+            else
+                Genres.Clear();
 
             Uri uri = new(APIURL + "/genre/movie/list" + APIHEADER);
             try
@@ -38,7 +42,7 @@ namespace ShowMovies.Services
                     GenreResult result = JsonSerializer.Deserialize<GenreResult>(content);
                     foreach (var item in result.genres)
                     {
-                        Items.Add(item);
+                        Genres.Add(item);
                     }
                 }
             }
@@ -47,7 +51,7 @@ namespace ShowMovies.Services
                 Debug.WriteLine(@"\tERROR {0}", ex.Message);
             }
 
-            return Items;
+            return Genres;
         }
 
         public async Task<Movie> GetMovie(int id)
@@ -72,10 +76,35 @@ namespace ShowMovies.Services
             return Item;
         }
 
-        public async Task<List<UserReviews>> GetMovieReviewsAsync(int id)
+        public async Task<string> GetTrailerUrl(int id)
+        {
+            string Item = string.Empty;
+
+            Uri uri = new(APIURL + "/movie/" + id.ToString() + "/videos" + APIHEADER);
+            try
+            {
+                HttpResponseMessage response = await client.GetAsync(uri);
+                if (response.IsSuccessStatusCode)
+                {
+                    string content = await response.Content.ReadAsStringAsync();
+                    VideoResult result = JsonSerializer.Deserialize<VideoResult>(content);
+                    Video video = result.results[0];
+                    if (video.site.Equals("YouTube"))
+                        Item = "https://www.youtube.com/watch?v=" + video.key;
+                    Debug.WriteLine("Video link: " + Item);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(@"\tERROR {0}", ex.Message);
+            }
+
+            return Item;
+        }
+
+        public async Task<List<UserReviews>> GetMovieReviewsAsync(int id) ////////////////////////////////////////////////////////////////
         {
             List<UserReviews> Items = new();
-
             int page = 1;
             Uri baseUri = new(APIURL + "/movie/" + id.ToString() + "/reviews" + APIHEADER + "&page=");
             Uri uri = new(baseUri + page.ToString());
@@ -87,22 +116,13 @@ namespace ShowMovies.Services
                     string content = await response.Content.ReadAsStringAsync();
                     ReviewResult result = JsonSerializer.Deserialize<ReviewResult>(content);
                     int totalPage = result.total_pages;
-                    for (int i = 1; i <= totalPage; i++)
+
+                    foreach (var item in result.results)
                     {
-                        page = i;
-                        uri = new Uri(baseUri + page.ToString());
-                        response = await client.GetAsync(uri);
-                        if (response.IsSuccessStatusCode)
-                        {
-                            content = await response.Content.ReadAsStringAsync();
-                            result = JsonSerializer.Deserialize<ReviewResult>(content);
-                            foreach (var item in result.results)
-                            {
-                                Items.Add(item);
-                            }
-                        }
-                        Debug.WriteLine($"finished loading page {page} out of {totalPage}");
+                        Items.Add(item);
                     }
+
+                    Debug.WriteLine($"finished loading page {page} out of {totalPage}");
                 }
             }
             catch (Exception ex)
@@ -113,10 +133,9 @@ namespace ShowMovies.Services
             return Items;
         }
 
-        public async Task<List<Movie>> GetMovieAsync(string searchkey)
+        public async Task<MovieResult> GetMovieAsync(string searchkey, int page)
         {
-            List<Movie> Items = new();
-            int page = 1;
+            MovieResult Items = new();
 
             Uri baseUri = new(APIURL + "/search/movie" + APIHEADER + "&query=" + searchkey + "&page=");
             Uri uri = new(baseUri + page.ToString());
@@ -126,25 +145,7 @@ namespace ShowMovies.Services
                 if (response.IsSuccessStatusCode)
                 {
                     string content = await response.Content.ReadAsStringAsync();
-                    MovieResult result = JsonSerializer.Deserialize<MovieResult>(content);
-                    int totalPage = result.total_pages;
-                    for (int i = 1; i <= totalPage; i++)
-                    {
-                        page = i;
-                        uri = new Uri(baseUri + page.ToString());
-                        response = await client.GetAsync(uri);
-                        if (response.IsSuccessStatusCode)
-                        {
-                            content = await response.Content.ReadAsStringAsync();
-                            result = JsonSerializer.Deserialize<MovieResult>(content);
-                            foreach (var item in result.results)
-                            {
-                                item.poster_path = "https://image.tmdb.org/t/p/w200" + item.poster_path;
-                                Items.Add(item);
-                            }
-                        }
-                        Debug.WriteLine($"finished loading page {page} out of {totalPage}");
-                    }
+                    Items = JsonSerializer.Deserialize<MovieResult>(content);
                 }
             }
             catch (Exception ex)
@@ -155,37 +156,18 @@ namespace ShowMovies.Services
             return Items;
         }
 
-        // not used. API problem, it keeps loading all movies instead of the search key
-        public async Task<List<Movie>> GetMovieByGenreAsync(string genrekey)
+        public async Task<MovieResult> GetMovieByGenreAsync(int genrekey, int page)
         {
-            List<Movie> Items = new();
-            int page = 1;
-            Uri baseUri = new(APIURL + "/discover/movie" + APIHEADER + "&sort_by=vote_average.desc&include_video=true&page=");
-            Uri uri = new(baseUri + page.ToString() + "&with_genres=" + genrekey);
+            MovieResult Items = new();
+            Uri baseUri = new(APIURL + "/discover/movie" + APIHEADER + "&sort_by=popularity.desc&include_video=true&page=");
+            Uri uri = new(baseUri + page.ToString() + "&with_genres=" + genrekey.ToString());
             try
             {
                 HttpResponseMessage response = await client.GetAsync(uri);
                 if (response.IsSuccessStatusCode)
                 {
                     string content = await response.Content.ReadAsStringAsync();
-                    MovieResult result = JsonSerializer.Deserialize<MovieResult>(content);
-                    int totalPage = (result.total_pages > 5) ? 5 : result.total_pages; // takes too much time, lazy load later
-                    for (int i = 1; i <= totalPage; i++)
-                    {
-                        page = i;
-                        uri = new Uri(baseUri + page.ToString() + "&with_genres=" + genrekey);
-                        response = await client.GetAsync(uri);
-                        if (response.IsSuccessStatusCode)
-                        {
-                            content = await response.Content.ReadAsStringAsync();
-                            result = JsonSerializer.Deserialize<MovieResult>(content);
-                            foreach (var item in result.results)
-                            {
-                                Items.Add(item);
-                            }
-                        }
-                        Debug.WriteLine($"finished loading page {page} out of {totalPage}");
-                    }
+                    Items = JsonSerializer.Deserialize<MovieResult>(content);
                 }
             }
             catch (Exception ex)
