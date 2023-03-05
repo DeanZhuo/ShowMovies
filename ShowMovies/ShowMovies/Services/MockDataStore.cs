@@ -26,9 +26,9 @@ namespace ShowMovies.Services
 
         public async Task<List<Genre>> GetItemAsync()
         {
-            List<Genre> Items = new List<Genre>();
+            List<Genre> Items = new();
 
-            Uri uri = new Uri(APIURL + "/genre/movie/list" + APIHEADER);
+            Uri uri = new(APIURL + "/genre/movie/list" + APIHEADER);
             try
             {
                 HttpResponseMessage response = await client.GetAsync(uri);
@@ -52,9 +52,9 @@ namespace ShowMovies.Services
 
         public async Task<Movie> GetMovie(int id)
         {
-            Movie Item = new Movie();
+            Movie Item = new();
 
-            Uri uri = new Uri(APIURL + "/movie/" + id.ToString() + APIHEADER);
+            Uri uri = new(APIURL + "/movie/" + id.ToString() + APIHEADER);
             try
             {
                 HttpResponseMessage response = await client.GetAsync(uri);
@@ -74,11 +74,11 @@ namespace ShowMovies.Services
 
         public async Task<List<UserReviews>> GetMovieReviewsAsync(int id)
         {
-            List<UserReviews> Items = new List<UserReviews>();
+            List<UserReviews> Items = new();
 
             int page = 1;
-            Uri baseUri = new Uri(APIURL + "/movie/" + id.ToString() + "/reviews" + APIHEADER + "&page=");
-            Uri uri = new Uri(baseUri + page.ToString());
+            Uri baseUri = new(APIURL + "/movie/" + id.ToString() + "/reviews" + APIHEADER + "&page=");
+            Uri uri = new(baseUri + page.ToString());
             try
             {
                 HttpResponseMessage response = await client.GetAsync(uri);
@@ -115,11 +115,11 @@ namespace ShowMovies.Services
 
         public async Task<List<Movie>> GetMovieAsync(string searchkey)
         {
-            List<Movie> Items = new List<Movie>();
+            List<Movie> Items = new();
             int page = 1;
 
-            Uri baseUri = new Uri(APIURL + "/search/movie" + APIHEADER + "&query=" + searchkey + "&page=");
-            Uri uri = new Uri(baseUri + page.ToString());
+            Uri baseUri = new(APIURL + "/search/movie" + APIHEADER + "&query=" + searchkey + "&page=");
+            Uri uri = new(baseUri + page.ToString());
             try
             {
                 HttpResponseMessage response = await client.GetAsync(uri);
@@ -139,6 +139,7 @@ namespace ShowMovies.Services
                             result = JsonSerializer.Deserialize<MovieResult>(content);
                             foreach (var item in result.results)
                             {
+                                item.poster_path = "https://image.tmdb.org/t/p/w200" + item.poster_path;
                                 Items.Add(item);
                             }
                         }
@@ -157,10 +158,10 @@ namespace ShowMovies.Services
         // not used. API problem, it keeps loading all movies instead of the search key
         public async Task<List<Movie>> GetMovieByGenreAsync(string genrekey)
         {
-            List<Movie> Items = new List<Movie>();
+            List<Movie> Items = new();
             int page = 1;
-            Uri baseUri = new Uri(APIURL + "/discover/movie" + APIHEADER + "&sort_by=vote_average.desc&include_video=true&page=");
-            Uri uri = new Uri(baseUri + page.ToString() + "&with_genres=" + genrekey);
+            Uri baseUri = new(APIURL + "/discover/movie" + APIHEADER + "&sort_by=vote_average.desc&include_video=true&page=");
+            Uri uri = new(baseUri + page.ToString() + "&with_genres=" + genrekey);
             try
             {
                 HttpResponseMessage response = await client.GetAsync(uri);

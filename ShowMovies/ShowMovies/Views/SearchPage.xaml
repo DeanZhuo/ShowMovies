@@ -15,12 +15,12 @@
                 ItemsSource="{Binding Movies}"
                 SelectionMode="None">
                     <CollectionView.EmptyView>
-                        <Image Source="search.png" WidthRequest="30" />
+                        <Image Source="search.png" />
                     </CollectionView.EmptyView>
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="model:Movie">
-                            <StackLayout Padding="10">
-                                <Image Source="{Binding poster_path}" WidthRequest="40" />
+                            <StackLayout Padding="10" Orientation="Horizontal">
+                                <Image Source="{Binding poster_path}" WidthRequest="60" />
                                 <StackLayout>
                                     <Label Text="{Binding title}"
                                 MaxLines="2"

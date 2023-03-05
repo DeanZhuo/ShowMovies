@@ -13,8 +13,8 @@
                 SelectionMode="None">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="model:Movie">
-                    <StackLayout Padding="10">
-                        <Image Source="{Binding poster_path}" WidthRequest="40" />
+                    <StackLayout Padding="10" Orientation="Horizontal">
+                        <Image Source="{Binding poster_path}" WidthRequest="60" />
                         <StackLayout>
                             <Label Text="{Binding title}"
                                 MaxLines="2"

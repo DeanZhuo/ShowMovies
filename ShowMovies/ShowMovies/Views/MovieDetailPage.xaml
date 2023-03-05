@@ -10,7 +10,7 @@
         <RefreshView Margin="10, 0" Command="{Binding LoadItemsCommand}" IsRefreshing="{Binding IsBusy, Mode=TwoWay}">
             <ScrollView>
                 <StackLayout Margin="20" Padding="5">
-                    <Image Source="{Binding ImageUrl}" HorizontalOptions="CenterAndExpand" />
+                    <Image Source="{Binding ImageUrl}" HorizontalOptions="CenterAndExpand" WidthRequest="400" />
                     <Label Text="{Binding MovieTitle}" FontAttributes="Bold" FontSize="20" />
                     <Label Text="{Binding MovieGenre}" />
                     <Label Text="{Binding Vote}" FontSize="18" FontAttributes="Bold" HorizontalTextAlignment="End" />

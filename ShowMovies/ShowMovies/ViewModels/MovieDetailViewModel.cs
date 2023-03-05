@@ -69,10 +69,11 @@ namespace ShowMovies.ViewModels
 
         private void DisplayDetail(Movie movie)
         {
-            ImageUrl = "https://image.tmdb.org/t/p/original" + movie.poster_path;
+            ImageUrl = "https://image.tmdb.org/t/p/w400" + movie.poster_path;
             Vote = movie.vote_average.ToString();
             MovieTitle = movie.title;
             Tagline = movie.tagline;
+            MovieGenre = string.Empty;
             foreach (var item in movie.genres)
             {
                 MovieGenre = MovieGenre + " | " + item.name;
