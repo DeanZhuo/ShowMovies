@@ -12,6 +12,8 @@ namespace ShowMovies.Services
 
         Task<List<Movie>> GetMovieAsync(string searchkey);
 
+        Task<List<UserReviews>> GetMovieReviewsAsync(int id);
+
         Task<List<Movie>> GetMovieByGenreAsync(string genrekey);
     }
 }

@@ -1,4 +1,7 @@
-﻿namespace ShowMovies.Models
+﻿using System;
+using System.Text.Json.Serialization;
+
+namespace ShowMovies.Models
 {
     public class Movie
     {
@@ -53,5 +56,28 @@
     {
         public string iso_639_1 { get; set; }
         public string name { get; set; }
+    }
+
+    public class UserReviews
+    {
+        public string author { get; set; }
+        public Author_Details author_details { get; set; }
+        public string content { get; set; }
+        public DateTime created_at { get; set; }
+        public string id { get; set; }
+        public DateTime updated_at { get; set; }
+        public string url { get; set; }
+    }
+
+    public class Author_Details
+    {
+        public string name { get; set; }
+        public string username { get; set; }
+
+        [JsonIgnore]
+        public string? avatar_path { get; set; }
+
+        [JsonIgnore]
+        public int? rating { get; set; }
     }
 }

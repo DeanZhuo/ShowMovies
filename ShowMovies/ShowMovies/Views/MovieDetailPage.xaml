@@ -1,12 +1,40 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ShowMovies.Views.MovieDetailPage">
+             xmlns:model="clr-namespace:ShowMovies.Models"
+             xmlns:local="clr-namespace:ShowMovies.ViewModels"
+             x:Class="ShowMovies.Views.MovieDetailPage"
+             x:DataType="local:MovieDetailViewModel"
+             BackgroundColor="{StaticResource Primary}">
     <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
-                VerticalOptions="CenterAndExpand"
-                HorizontalOptions="CenterAndExpand" />
-        </StackLayout>
+        <RefreshView Margin="10, 0" Command="{Binding LoadItemsCommand}" IsRefreshing="{Binding IsBusy, Mode=TwoWay}">
+            <ScrollView>
+                <StackLayout Margin="20" Padding="5">
+                    <Image Source="{Binding ImageUrl}" HorizontalOptions="CenterAndExpand" />
+                    <Label Text="{Binding MovieTitle}" FontAttributes="Bold" FontSize="20" />
+                    <Label Text="{Binding MovieGenre}" />
+                    <Label Text="{Binding Vote}" FontSize="18" FontAttributes="Bold" HorizontalTextAlignment="End" />
+                    <Label Text="{Binding Tagline}" />
+                    <Label Text="{Binding Overview}" FontSize="16" />
+                    <Label Text="{Binding OriginalTitle}" FontSize="16" />
+                    <Label Text="{Binding ReleasedDate}" FontSize="16" />
+                    <Label Text="Reviews" FontSize="Large" FontAttributes="Bold" TextColor="{StaticResource Tertiary}" Margin="10" />
+                    <CollectionView ItemsSource="{Binding Reviews}" SelectionMode="None">
+                        <CollectionView.EmptyView>
+                            <Label Text="No review yet" />
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="model:UserReviews">
+                                <StackLayout>
+                                    <Label Text="{Binding author}" FontAttributes="Bold" />
+                                    <Label Text="{Binding content}" />
+                                    <Label Text="{Binding created_at}" HorizontalTextAlignment="End" />
+                                </StackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </StackLayout>
+            </ScrollView>
+        </RefreshView>
     </ContentPage.Content>
 </ContentPage>

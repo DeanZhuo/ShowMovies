@@ -7,7 +7,8 @@
     -->
     <Application.Resources>
         <ResourceDictionary>
-            <Color x:Key="Primary">#2196F3</Color>
+            <Color x:Key="Primary">#0d253f</Color>
+            <Color x:Key="Tertiary">#90cea1</Color>
             <Style TargetType="Button">
                 <Setter Property="TextColor" Value="White"></Setter>
                 <Setter Property="VisualStateManager.VisualStateGroups">
@@ -26,6 +27,9 @@
                         </VisualStateGroup>
                     </VisualStateGroupList>
                 </Setter>
+            </Style>
+            <Style TargetType="Label">
+                <Setter Property="TextColor" Value="White" />
             </Style>
         </ResourceDictionary>
     </Application.Resources>

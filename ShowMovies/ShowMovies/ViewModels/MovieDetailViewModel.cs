@@ -1,4 +1,9 @@
-﻿using Xamarin.Forms;
+﻿using ShowMovies.Models;
+using System;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using Xamarin.Forms;
 
 namespace ShowMovies.ViewModels
 {
@@ -17,6 +22,137 @@ namespace ShowMovies.ViewModels
             {
                 movieId = value;
             }
+        }
+
+        public Movie movie { get; set; }
+        public ObservableCollection<UserReviews> Reviews { get; } = new ObservableCollection<UserReviews>();
+
+        public void OnAppearing()
+        {
+            IsBusy = true;
+        }
+
+        public Command LoadItemsCommand { get; }
+
+        public MovieDetailViewModel()
+        {
+            LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
+        }
+
+        private async Task ExecuteLoadItemsCommand()
+        {
+            IsBusy = true;
+
+            try
+            {
+                movie = await DataStore.GetMovie(MovieId);
+                Debug.WriteLine("Movie item:" + movie.title);
+
+                DisplayDetail(movie);
+
+                Reviews.Clear();
+                var userReviews = await DataStore.GetMovieReviewsAsync(MovieId);
+                foreach (var item in userReviews)
+                {
+                    Reviews.Add(item);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private void DisplayDetail(Movie movie)
+        {
+            ImageUrl = "https://image.tmdb.org/t/p/original" + movie.poster_path;
+            Vote = movie.vote_average.ToString();
+            MovieTitle = movie.title;
+            Tagline = movie.tagline;
+            foreach (var item in movie.genres)
+            {
+                MovieGenre = MovieGenre + " | " + item.name;
+            }
+            ReleasedDate = "Release Date: " + movie.release_date;
+            Overview = movie.overview;
+            OriginalTitle = "Original Title: " + movie.original_title;
+            Language = "Language: " + movie.original_language;
+        }
+
+        private string imageUrl;
+
+        public string ImageUrl
+        {
+            get { return imageUrl; }
+            set { SetProperty(ref imageUrl, value); }
+        }
+
+        private string vote;
+
+        public string Vote
+        {
+            get { return vote; }
+            set { SetProperty(ref vote, value); }
+        }
+
+        private string movieTitle;
+
+        public string MovieTitle
+        {
+            get { return movieTitle; }
+            set { SetProperty(ref movieTitle, value); }
+        }
+
+        private string tagline;
+
+        public string Tagline
+        {
+            get { return tagline; }
+            set { SetProperty(ref tagline, value); }
+        }
+
+        private string movieGenre;
+
+        public string MovieGenre
+        {
+            get { return movieGenre; }
+            set { SetProperty(ref movieGenre, value); }
+        }
+
+        private string releasedDate;
+
+        public string ReleasedDate
+        {
+            get { return releasedDate; }
+            set { SetProperty(ref releasedDate, value); }
+        }
+
+        private string overview;
+
+        public string Overview
+        {
+            get { return overview; }
+            set { SetProperty(ref overview, value); }
+        }
+
+        private string originalTitle;
+
+        public string OriginalTitle
+        {
+            get { return originalTitle; }
+            set { SetProperty(ref originalTitle, value); }
+        }
+
+        private string language;
+
+        public string Language
+        {
+            get { return language; }
+            set { SetProperty(ref language, value); }
         }
     }
 }

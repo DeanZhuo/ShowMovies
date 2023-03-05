@@ -13,7 +13,7 @@ namespace ShowMovies.Services
         private const string APIKEY = "1227a9062ce42533a66af3933fd9237c";
 
         //url: APIURL + route + APIHEADER + query
-        private const string APIURL = "https://api.themoviedb.org/3/";
+        private const string APIURL = "https://api.themoviedb.org/3";
 
         private const string APIHEADER = "?api_key=" + APIKEY + "&language=en-US";
 
@@ -28,7 +28,7 @@ namespace ShowMovies.Services
         {
             List<Genre> Items = new List<Genre>();
 
-            Uri uri = new Uri(APIURL + "/genre/movie/list" + APIHEADER + "/");
+            Uri uri = new Uri(APIURL + "/genre/movie/list" + APIHEADER);
             try
             {
                 HttpResponseMessage response = await client.GetAsync(uri);
@@ -50,16 +50,76 @@ namespace ShowMovies.Services
             return Items;
         }
 
-        public Task<Movie> GetMovie(int id)
+        public async Task<Movie> GetMovie(int id)
         {
-            throw new NotImplementedException();
+            Movie Item = new Movie();
+
+            Uri uri = new Uri(APIURL + "/movie/" + id.ToString() + APIHEADER);
+            try
+            {
+                HttpResponseMessage response = await client.GetAsync(uri);
+                if (response.IsSuccessStatusCode)
+                {
+                    string content = await response.Content.ReadAsStringAsync();
+                    Item = JsonSerializer.Deserialize<Movie>(content);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(@"\tERROR {0}", ex.Message);
+            }
+
+            return Item;
+        }
+
+        public async Task<List<UserReviews>> GetMovieReviewsAsync(int id)
+        {
+            List<UserReviews> Items = new List<UserReviews>();
+
+            int page = 1;
+            Uri baseUri = new Uri(APIURL + "/movie/" + id.ToString() + "/reviews" + APIHEADER + "&page=");
+            Uri uri = new Uri(baseUri + page.ToString());
+            try
+            {
+                HttpResponseMessage response = await client.GetAsync(uri);
+                if (response.IsSuccessStatusCode)
+                {
+                    string content = await response.Content.ReadAsStringAsync();
+                    ReviewResult result = JsonSerializer.Deserialize<ReviewResult>(content);
+                    int totalPage = result.total_pages;
+                    for (int i = 1; i <= totalPage; i++)
+                    {
+                        page = i;
+                        uri = new Uri(baseUri + page.ToString());
+                        response = await client.GetAsync(uri);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            content = await response.Content.ReadAsStringAsync();
+                            result = JsonSerializer.Deserialize<ReviewResult>(content);
+                            foreach (var item in result.results)
+                            {
+                                Items.Add(item);
+                            }
+                        }
+                        Debug.WriteLine($"finished loading page {page} out of {totalPage}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(@"\tERROR {0}", ex.Message);
+            }
+
+            return Items;
         }
 
         public async Task<List<Movie>> GetMovieAsync(string searchkey)
         {
             List<Movie> Items = new List<Movie>();
             int page = 1;
-            Uri uri = new Uri(APIURL + "/search/movie" + APIHEADER + "&query=" + searchkey + "&page=" + page);
+
+            Uri baseUri = new Uri(APIURL + "/search/movie" + APIHEADER + "&query=" + searchkey + "&page=");
+            Uri uri = new Uri(baseUri + page.ToString());
             try
             {
                 HttpResponseMessage response = await client.GetAsync(uri);
@@ -71,7 +131,7 @@ namespace ShowMovies.Services
                     for (int i = 1; i <= totalPage; i++)
                     {
                         page = i;
-                        uri = new Uri(APIURL + "/search/movie" + APIHEADER + "&query=" + searchkey + "&page=" + page);
+                        uri = new Uri(baseUri + page.ToString());
                         response = await client.GetAsync(uri);
                         if (response.IsSuccessStatusCode)
                         {
@@ -94,13 +154,13 @@ namespace ShowMovies.Services
             return Items;
         }
 
+        // not used. API problem, it keeps loading all movies instead of the search key
         public async Task<List<Movie>> GetMovieByGenreAsync(string genrekey)
         {
             List<Movie> Items = new List<Movie>();
             int page = 1;
-            //https://api.themoviedb.org/3/discover/movie?api_key=1227a9062ce42533a66af3933fd9237c&language=en-US&sort_by=vote_average.desc&include_video=true&page=1&with_genres=action
             Uri baseUri = new Uri(APIURL + "/discover/movie" + APIHEADER + "&sort_by=vote_average.desc&include_video=true&page=");
-            Uri uri = new Uri(baseUri, page + "&with_genres=" + genrekey);
+            Uri uri = new Uri(baseUri + page.ToString() + "&with_genres=" + genrekey);
             try
             {
                 HttpResponseMessage response = await client.GetAsync(uri);
@@ -108,11 +168,11 @@ namespace ShowMovies.Services
                 {
                     string content = await response.Content.ReadAsStringAsync();
                     MovieResult result = JsonSerializer.Deserialize<MovieResult>(content);
-                    int totalPage = result.total_pages;
+                    int totalPage = (result.total_pages > 5) ? 5 : result.total_pages; // takes too much time, lazy load later
                     for (int i = 1; i <= totalPage; i++)
                     {
                         page = i;
-                        uri = uri = new Uri(baseUri, page + "&with_genres=" + genrekey);
+                        uri = new Uri(baseUri + page.ToString() + "&with_genres=" + genrekey);
                         response = await client.GetAsync(uri);
                         if (response.IsSuccessStatusCode)
                         {

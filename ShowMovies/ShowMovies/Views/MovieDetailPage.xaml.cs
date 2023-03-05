@@ -5,10 +5,18 @@ namespace ShowMovies.Views
 {
     public partial class MovieDetailPage : ContentPage
     {
+        private MovieDetailViewModel _viewModel;
+
         public MovieDetailPage()
         {
             InitializeComponent();
-            BindingContext = new MovieDetailViewModel();
+            BindingContext = _viewModel = new MovieDetailViewModel();
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            _viewModel.OnAppearing();
         }
     }
 }

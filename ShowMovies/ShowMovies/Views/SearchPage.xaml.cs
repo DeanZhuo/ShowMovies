@@ -1,14 +1,16 @@
-﻿using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
+﻿using ShowMovies.ViewModels;
+using Xamarin.Forms;
 
 namespace ShowMovies.Views
 {
-    [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class SearchPage : ContentPage
     {
+        private SearchViewModel _viewModel;
+
         public SearchPage()
         {
             InitializeComponent();
+            BindingContext = _viewModel = new SearchViewModel();
         }
     }
 }

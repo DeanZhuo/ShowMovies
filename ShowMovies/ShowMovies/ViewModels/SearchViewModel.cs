@@ -8,43 +8,28 @@ using Xamarin.Forms;
 
 namespace ShowMovies.ViewModels
 {
-    [QueryProperty(nameof(GenreName), nameof(GenreName))]
-    public class ItemDetailViewModel : BaseViewModel
+    public class SearchViewModel : BaseViewModel
     {
-        private string genreName;
-
-        public string GenreName
-        {
-            get
-            {
-                return genreName;
-            }
-            set
-            {
-                genreName = value;
-            }
-        }
-
-        public Command LoadItemsCommand { get; }
         public Command<Movie> ItemTapped { get; }
+        public Command<string> SearchCommand { get; }
         public ObservableCollection<Movie> Movies { get; }
 
-        public ItemDetailViewModel()
+        public SearchViewModel()
         {
+            Title = "Search";
             Movies = new ObservableCollection<Movie>();
-            LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
-
             ItemTapped = new Command<Movie>(OnItemSelected);
+            SearchCommand = new Command<string>(async (p) => await PerformSearch(p));
         }
 
-        private async Task ExecuteLoadItemsCommand()
+        private async Task PerformSearch(string keyword)
         {
             IsBusy = true;
 
             try
             {
                 Movies.Clear();
-                var items = await DataStore.GetMovieAsync(GenreName);
+                var items = await DataStore.GetMovieAsync(keyword);
                 foreach (var item in items)
                 {
                     Movies.Add(item);
@@ -62,7 +47,7 @@ namespace ShowMovies.ViewModels
 
         public void OnAppearing()
         {
-            IsBusy = true;
+            IsBusy = false;
             SelectedItem = null;
         }
 

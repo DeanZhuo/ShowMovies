@@ -1,12 +1,45 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ShowMovies.Views.SearchPage">
+             xmlns:model="clr-namespace:ShowMovies.Models"
+             xmlns:local="clr-namespace:ShowMovies.ViewModels"
+             x:Class="ShowMovies.Views.SearchPage"
+             x:DataType="local:SearchViewModel"
+             BackgroundColor="{StaticResource Primary}">
     <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
-                VerticalOptions="CenterAndExpand"
-                HorizontalOptions="CenterAndExpand" />
+
+        <StackLayout Margin="15, 0">
+            <SearchBar Placeholder="Search..." x:Name="searchbar" BackgroundColor="{StaticResource Tertiary}" SearchCommand="{Binding SearchCommand}" SearchCommandParameter="{Binding Text, Source={x:Reference searchbar}}" />
+            <RefreshView Margin="10, 0" x:DataType="local:SearchViewModel" IsRefreshing="{Binding IsBusy, Mode=TwoWay}">
+                <CollectionView x:Name="ItemsListView"
+                ItemsSource="{Binding Movies}"
+                SelectionMode="None">
+                    <CollectionView.EmptyView>
+                        <Image Source="search.png" WidthRequest="30" />
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="model:Movie">
+                            <StackLayout Padding="10">
+                                <Image Source="{Binding poster_path}" WidthRequest="40" />
+                                <StackLayout>
+                                    <Label Text="{Binding title}"
+                                MaxLines="2"
+                                   TextColor="White"
+                                FontSize="20" />
+                                    <Label Text="{Binding release_date}" />
+                                </StackLayout>
+                                <StackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                NumberOfTapsRequired="1"
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:SearchViewModel}}, Path=ItemTapped}"
+                                CommandParameter="{Binding .}">
+                                    </TapGestureRecognizer>
+                                </StackLayout.GestureRecognizers>
+                            </StackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </RefreshView>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

@@ -4,19 +4,24 @@
              xmlns:model="clr-namespace:ShowMovies.Models"
              xmlns:local="clr-namespace:ShowMovies.ViewModels"
              x:Class="ShowMovies.Views.ItemDetailPage"
-             Title="{Binding GenreName}">
+             Title="{Binding GenreName}"
+             BackgroundColor="{StaticResource Primary}">
 
     <RefreshView Margin="10, 0" x:DataType="local:ItemDetailViewModel" Command="{Binding LoadItemsCommand}" IsRefreshing="{Binding IsBusy, Mode=TwoWay}">
         <CollectionView x:Name="ItemsListView"
                 ItemsSource="{Binding Movies}"
                 SelectionMode="None">
             <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <StackLayout Padding="10" x:DataType="model:Movie">
-                        <Label Text="{Binding title}"
-                            LineBreakMode="NoWrap"
-                               TextColor="Black"
-                            FontSize="20" />
+                <DataTemplate x:DataType="model:Movie">
+                    <StackLayout Padding="10">
+                        <Image Source="{Binding poster_path}" WidthRequest="40" />
+                        <StackLayout>
+                            <Label Text="{Binding title}"
+                                MaxLines="2"
+                                   TextColor="White"
+                                FontSize="20" />
+                            <Label Text="{Binding release_date}" />
+                        </StackLayout>
                         <StackLayout.GestureRecognizers>
                             <TapGestureRecognizer
                                 NumberOfTapsRequired="1"
