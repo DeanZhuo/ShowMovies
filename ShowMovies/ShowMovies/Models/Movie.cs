@@ -6,12 +6,17 @@ namespace ShowMovies.Models
     public class Movie
     {
         public bool adult { get; set; }
+        [JsonIgnore]
         public string backdrop_path { get; set; }
+        [JsonIgnore]
         public object belongs_to_collection { get; set; }
+        [JsonIgnore]
         public int budget { get; set; }
         public Genre[] genres { get; set; }
+        [JsonIgnore]
         public string homepage { get; set; }
         public int id { get; set; }
+        [JsonIgnore]
         public string imdb_id { get; set; }
         public string original_language { get; set; }
         public string original_title { get; set; }
@@ -21,7 +26,9 @@ namespace ShowMovies.Models
         public Production_Companies[] production_companies { get; set; }
         public Production_Countries[] production_countries { get; set; }
         public string release_date { get; set; }
+        [JsonIgnore]
         public int revenue { get; set; }
+        [JsonIgnore]
         public int runtime { get; set; }
         public Spoken_Languages[] spoken_languages { get; set; }
         public string status { get; set; }

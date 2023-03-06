@@ -27,6 +27,8 @@ namespace ShowMovies.Services
 
         public async Task<List<Genre>> GetItemAsync()
         {
+            // get all genre. only call API if the genre list is empty
+            // https://developers.themoviedb.org/3/genres/get-movie-list
             if (Genres.Count > 0)
                 return Genres;
             else
@@ -56,6 +58,8 @@ namespace ShowMovies.Services
 
         public async Task<Movie> GetMovie(int id)
         {
+            // get a movie item detail by movie id
+            // https://developers.themoviedb.org/3/movies/get-movie-details
             Movie Item = new();
 
             Uri uri = new(APIURL + "/movie/" + id.ToString() + APIHEADER);
@@ -78,6 +82,8 @@ namespace ShowMovies.Services
 
         public async Task<string> GetTrailerUrl(int id)
         {
+            // get youtube links of movie trailer. return if the video is available in youtube and is a trailer
+            // https://developers.themoviedb.org/3/movies/get-movie-videos
             string Item = string.Empty;
 
             Uri uri = new(APIURL + "/movie/" + id.ToString() + "/videos" + APIHEADER);
@@ -109,6 +115,8 @@ namespace ShowMovies.Services
 
         public async Task<ReviewResult> GetMovieReviewsAsync(int id, int page)
         {
+            // get a movie review by id. page parameter used for lazy load
+            // https://developers.themoviedb.org/3/movies/get-movie-reviews
             ReviewResult Items = new();
             Uri baseUri = new(APIURL + "/movie/" + id.ToString() + "/reviews" + APIHEADER + "&page=");
             Uri uri = new(baseUri + page.ToString());
@@ -131,6 +139,8 @@ namespace ShowMovies.Services
 
         public async Task<MovieResult> GetMovieAsync(string searchkey, int page)
         {
+            // get movies for search page. page parameter for lazy load
+            // https://developers.themoviedb.org/3/search/search-movies
             MovieResult Items = new();
 
             Uri baseUri = new(APIURL + "/search/movie" + APIHEADER + "&query=" + searchkey + "&page=");
@@ -154,6 +164,8 @@ namespace ShowMovies.Services
 
         public async Task<MovieResult> GetMovieByGenreAsync(int genrekey, int page)
         {
+            // get movies for genre page. page parameter for lazy load
+            // https://developers.themoviedb.org/3/discover/movie-discover
             MovieResult Items = new();
             Uri baseUri = new(APIURL + "/discover/movie" + APIHEADER + "&sort_by=popularity.desc&include_video=true&page=");
             Uri uri = new(baseUri + page.ToString() + "&with_genres=" + genrekey.ToString());

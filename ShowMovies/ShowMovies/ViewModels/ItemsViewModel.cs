@@ -10,18 +10,11 @@ namespace ShowMovies.ViewModels
 {
     public class ItemsViewModel : BaseViewModel
     {
-        private Genre _selectedGenre;
-
-        public ObservableCollection<Genre> Items { get; }
-        public Command LoadItemsCommand { get; }
-        public Command<Genre> ItemTapped { get; }
-
         public ItemsViewModel()
         {
             Title = "Browse Genre";
             Items = new ObservableCollection<Genre>();
             LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
-
             ItemTapped = new Command<Genre>(OnItemSelected);
         }
 
@@ -31,6 +24,7 @@ namespace ShowMovies.ViewModels
 
             try
             {
+                // clear list, get Genre list from API
                 Items.Clear();
                 var items = await DataStore.GetItemAsync();
                 foreach (var item in items)
@@ -49,6 +43,15 @@ namespace ShowMovies.ViewModels
             }
         }
 
+        private async void OnItemSelected(Genre item)
+        {
+            if (item == null)
+                return;
+
+            // This will push the ItemDetailPage onto the navigation stack
+            await Shell.Current.GoToAsync($"{nameof(ItemDetailPage)}?{nameof(ItemDetailViewModel.SelectedGenre)}={item.id}");
+        }
+
         public void OnAppearing()
         {
             IsBusy = true;
@@ -65,13 +68,10 @@ namespace ShowMovies.ViewModels
             }
         }
 
-        private async void OnItemSelected(Genre item)
-        {
-            if (item == null)
-                return;
+        private Genre _selectedGenre;
 
-            // This will push the ItemDetailPage onto the navigation stack
-            await Shell.Current.GoToAsync($"{nameof(ItemDetailPage)}?{nameof(ItemDetailViewModel.SelectedGenre)}={item.id}");
-        }
+        public ObservableCollection<Genre> Items { get; }
+        public Command LoadItemsCommand { get; }
+        public Command<Genre> ItemTapped { get; }
     }
 }

@@ -10,14 +10,6 @@ namespace ShowMovies.ViewModels
 {
     public class SearchViewModel : BaseViewModel
     {
-        public Command<Movie> ItemTapped { get; }
-        public Command<string> SearchCommand { get; }
-        public Command LoadMoreCommand { get; }
-        private int page;
-        private int lastPage;
-        private string keyword;
-        public ObservableCollection<Movie> Movies { get; }
-
         public SearchViewModel()
         {
             Title = "Search";
@@ -29,6 +21,7 @@ namespace ShowMovies.ViewModels
 
         private async Task LoadMoreMovie()
         {
+            // lazy load. call API to load the next page when there's less than 5 item in the collection view. return nothing if the last page is passed
             try
             {
                 page += 1;
@@ -54,10 +47,12 @@ namespace ShowMovies.ViewModels
 
         private async Task PerformSearch(string searchKey)
         {
+            // first load when the search or enter button is pressed. or if refreshed
             IsBusy = true;
 
             try
             {
+                // set the page and last page to stop the lazy load later
                 Movies.Clear();
                 page = 1;
                 keyword = searchKey;
@@ -82,11 +77,28 @@ namespace ShowMovies.ViewModels
             }
         }
 
+        private async void OnItemSelected(Movie item)
+        {
+            if (item == null)
+                return;
+
+            // This will push the MovieDetailPage onto the navigation stack
+            await Shell.Current.GoToAsync($"{nameof(MovieDetailPage)}?{nameof(MovieDetailViewModel.MovieId)}={item.id}");
+        }
+
         public void OnAppearing()
         {
             IsBusy = false;
             SelectedItem = null;
         }
+
+        public Command<Movie> ItemTapped { get; }
+        public Command<string> SearchCommand { get; }
+        public Command LoadMoreCommand { get; }
+        private int page;
+        private int lastPage;
+        private string keyword;
+        public ObservableCollection<Movie> Movies { get; }
 
         private Movie _selectedMovie;
 
@@ -98,15 +110,6 @@ namespace ShowMovies.ViewModels
                 SetProperty(ref _selectedMovie, value);
                 OnItemSelected(value);
             }
-        }
-
-        private async void OnItemSelected(Movie item)
-        {
-            if (item == null)
-                return;
-
-            // This will push the MovieDetailPage onto the navigation stack
-            await Shell.Current.GoToAsync($"{nameof(MovieDetailPage)}?{nameof(MovieDetailViewModel.MovieId)}={item.id}");
         }
     }
 }

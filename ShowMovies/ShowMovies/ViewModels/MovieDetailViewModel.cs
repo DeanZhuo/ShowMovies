@@ -2,44 +2,17 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
-using Xamarin.CommunityToolkit.Core;
 using Xamarin.Forms;
-using YoutubeExplode.Videos.Streams;
 using YoutubeExplode;
+using YoutubeExplode.Videos.Streams;
 
 namespace ShowMovies.ViewModels
 {
     [QueryProperty(nameof(MovieId), nameof(MovieId))]
     public class MovieDetailViewModel : BaseViewModel
     {
-        private int movieId;
-
-        public int MovieId
-        {
-            get
-            {
-                return movieId;
-            }
-            set
-            {
-                movieId = value;
-            }
-        }
-
-        public Movie movie { get; set; }
-        public ObservableCollection<UserReviews> Reviews { get; } = new ObservableCollection<UserReviews>();
-
-        public void OnAppearing()
-        {
-            IsBusy = true;
-        }
-
-        public Command LoadItemsCommand { get; }
-        public Command LoadMoreReviewsCommand { get; }
-        private int page;
-        private int lastPage;
-
         public MovieDetailViewModel()
         {
             LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
@@ -48,6 +21,7 @@ namespace ShowMovies.ViewModels
 
         private async Task LoadMoreReviews()
         {
+            // lazy load. call API to load the next page when there's less than 5 item in the collection view. return nothing if the last page is passed
             try
             {
                 page += 1;
@@ -69,6 +43,7 @@ namespace ShowMovies.ViewModels
 
         private async Task ExecuteLoadItemsCommand()
         {
+            // first load when the page appearing or if refreshed
             IsBusy = true;
 
             try
@@ -76,6 +51,7 @@ namespace ShowMovies.ViewModels
                 movie = await DataStore.GetMovie(MovieId);
                 Debug.WriteLine("Movie item:" + movie.title);
                 string YoutubeUrl = await DataStore.GetTrailerUrl(MovieId);
+                // change the message located before the trailer, and show the trailer
                 if (!string.IsNullOrEmpty(YoutubeUrl))
                 {
                     ShowTrailer = true;
@@ -84,6 +60,7 @@ namespace ShowMovies.ViewModels
                 }
                 DisplayDetail(movie);
 
+                // set the page and last page to stop the lazy load later
                 Reviews.Clear();
                 page = 1;
                 var userReviews = await DataStore.GetMovieReviewsAsync(MovieId, page);
@@ -105,6 +82,8 @@ namespace ShowMovies.ViewModels
 
         private async void GetVideoContent(string youtubeUrl)
         {
+            // the xamarin community toolkit (xct) having a bug and can't play youtube video (source: github thread)
+            // using YoutubeExplode to convert the YouTube link into video stream, and have the xct MediaElement play it
             YoutubeClient youtube = new();
             StreamManifest streamManifest = await youtube.Videos.Streams.GetManifestAsync(youtubeUrl);
             IVideoStreamInfo streamInfo = streamManifest.GetMuxedStreams().GetWithHighestVideoQuality();
@@ -112,25 +91,50 @@ namespace ShowMovies.ViewModels
             {
                 VideoUrl = streamInfo.Url;
             }
-
         }
 
         private void DisplayDetail(Movie movie)
         {
+            // copy movie data to property. binding only works on property with SetProperty or Observable
             ImageUrl = "https://image.tmdb.org/t/p/w400" + movie.poster_path;
             Vote = movie.vote_average.ToString();
             MovieTitle = movie.title;
             Tagline = movie.tagline;
             MovieGenre = string.Empty;
-            foreach (var item in movie.genres)
+            if (movie.genres.Length > 0)
             {
-                MovieGenre = MovieGenre + " | " + item.name;
+                foreach (var item in movie.genres)
+                {
+                    MovieGenre = MovieGenre + " | " + item.name;
+                }
             }
+            
             ReleasedDate = "Release Date: " + movie.release_date;
             Overview = movie.overview;
             OriginalTitle = "Original Title: " + movie.original_title;
             Language = "Language: " + movie.original_language;
         }
+
+        public void OnAppearing()
+        {
+            IsBusy = true;
+        }
+
+        public Command LoadItemsCommand { get; }
+        public Command LoadMoreReviewsCommand { get; }
+        private int page;
+        private int lastPage;
+
+        private int movieId;
+
+        public int MovieId
+        {
+            get { return movieId; }
+            set { movieId = value; }
+        }
+
+        public Movie movie { get; set; }
+        public ObservableCollection<UserReviews> Reviews { get; } = new ObservableCollection<UserReviews>();
 
         private string trailerMessage = "There's no trailer available.";
 
@@ -139,6 +143,7 @@ namespace ShowMovies.ViewModels
             get { return trailerMessage; }
             set { SetProperty(ref trailerMessage, value); }
         }
+
         private string imageUrl;
 
         public string ImageUrl
