@@ -16,7 +16,7 @@ namespace ShowMovies.Services
 
         Task<string> GetTrailerUrl(int id);
 
-        Task<List<UserReviews>> GetMovieReviewsAsync(int id);
+        Task<ReviewResult> GetMovieReviewsAsync(int id, int page);
 
         Task<MovieResult> GetMovieByGenreAsync(int genrekey, int page);
     }

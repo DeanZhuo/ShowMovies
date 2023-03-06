@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:xct="clr-namespace:Xamarin.CommunityToolkit.UI.Views;assembly=Xamarin.CommunityToolkit"
              xmlns:model="clr-namespace:ShowMovies.Models"
              xmlns:local="clr-namespace:ShowMovies.ViewModels"
+             xmlns:xct="clr-namespace:Xamarin.CommunityToolkit.UI.Views;assembly=Xamarin.CommunityToolkit"
              x:Class="ShowMovies.Views.MovieDetailPage"
              x:DataType="local:MovieDetailViewModel"
              BackgroundColor="{StaticResource Primary}">
@@ -26,7 +26,7 @@
                             HeightRequest="200"
                             IsVisible="{Binding ShowTrailer}" />
                     <Label Text="Reviews" FontSize="Large" FontAttributes="Bold" TextColor="{StaticResource Tertiary}" Margin="10" />
-                    <CollectionView ItemsSource="{Binding Reviews}" SelectionMode="None">
+                    <CollectionView ItemsSource="{Binding Reviews}" RemainingItemsThreshold="5" RemainingItemsThresholdReachedCommand="{Binding LoadMoreReviewsCommand}" SelectionMode="None">
                         <CollectionView.EmptyView>
                             <Label Text="No review yet" />
                         </CollectionView.EmptyView>

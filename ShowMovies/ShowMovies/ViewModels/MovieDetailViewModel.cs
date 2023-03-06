@@ -36,10 +36,35 @@ namespace ShowMovies.ViewModels
         }
 
         public Command LoadItemsCommand { get; }
+        public Command LoadMoreReviewsCommand { get; }
+        private int page;
+        private int lastPage;
 
         public MovieDetailViewModel()
         {
             LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
+            LoadMoreReviewsCommand = new Command(async () => await LoadMoreReviews());
+        }
+
+        private async Task LoadMoreReviews()
+        {
+            try
+            {
+                page += 1;
+                if (page > lastPage)
+                    return;
+
+                var result = await DataStore.GetMovieReviewsAsync(MovieId, page);
+                foreach (var item in result.results)
+                {
+                    Reviews.Add(item);
+                }
+                Debug.WriteLine($"finished loading page {page} out of {lastPage}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
         }
 
         private async Task ExecuteLoadItemsCommand()
@@ -60,8 +85,10 @@ namespace ShowMovies.ViewModels
                 DisplayDetail(movie);
 
                 Reviews.Clear();
-                var userReviews = await DataStore.GetMovieReviewsAsync(MovieId);///////////////////////////////////////
-                foreach (var item in userReviews)
+                page = 1;
+                var userReviews = await DataStore.GetMovieReviewsAsync(MovieId, page);
+                lastPage = userReviews.total_pages;
+                foreach (var item in userReviews.results)
                 {
                     Reviews.Add(item);
                 }

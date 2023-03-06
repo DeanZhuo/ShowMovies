@@ -88,9 +88,14 @@ namespace ShowMovies.Services
                 {
                     string content = await response.Content.ReadAsStringAsync();
                     VideoResult result = JsonSerializer.Deserialize<VideoResult>(content);
-                    Video video = result.results[0];
-                    if (video.site.Equals("YouTube"))
-                        Item = "https://www.youtube.com/watch?v=" + video.key;
+                    foreach (var item in result.results)
+                    {
+                        if (item.site.Equals("YouTube") && item.type.Equals("Trailer"))
+                        {
+                            Item = "https://www.youtube.com/watch?v=" + item.key;
+                            return Item;
+                        }
+                    }
                     Debug.WriteLine("Video link: " + Item);
                 }
             }
@@ -102,10 +107,9 @@ namespace ShowMovies.Services
             return Item;
         }
 
-        public async Task<List<UserReviews>> GetMovieReviewsAsync(int id) ////////////////////////////////////////////////////////////////
+        public async Task<ReviewResult> GetMovieReviewsAsync(int id, int page)
         {
-            List<UserReviews> Items = new();
-            int page = 1;
+            ReviewResult Items = new();
             Uri baseUri = new(APIURL + "/movie/" + id.ToString() + "/reviews" + APIHEADER + "&page=");
             Uri uri = new(baseUri + page.ToString());
             try
@@ -114,15 +118,7 @@ namespace ShowMovies.Services
                 if (response.IsSuccessStatusCode)
                 {
                     string content = await response.Content.ReadAsStringAsync();
-                    ReviewResult result = JsonSerializer.Deserialize<ReviewResult>(content);
-                    int totalPage = result.total_pages;
-
-                    foreach (var item in result.results)
-                    {
-                        Items.Add(item);
-                    }
-
-                    Debug.WriteLine($"finished loading page {page} out of {totalPage}");
+                    Items = JsonSerializer.Deserialize<ReviewResult>(content);
                 }
             }
             catch (Exception ex)
