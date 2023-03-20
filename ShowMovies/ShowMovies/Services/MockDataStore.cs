@@ -10,7 +10,7 @@ namespace ShowMovies.Services
 {
     public class MockDataStore : IDataStore
     {
-        private const string APIKEY = "1227a9062ce42533a66af3933fd9237c";
+        private const string APIKEY = "Your API KEY here";
 
         //url: APIURL + route + APIHEADER + query
         private const string APIURL = "https://api.themoviedb.org/3";
