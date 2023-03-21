@@ -1,6 +1,7 @@
 # ShowMovies
 
-A simple app made to vew movies by genre or by search. There's also some details of the movie, with Trailer Video and reviews.
+A simple app made to view movies by genre or by search. There's also some details of the movie, with Trailer Video and reviews.
+Developed using Xamarin.
 
 
 ![Screenshot_20230320-210404](https://user-images.githubusercontent.com/49544340/226512997-80f8df03-761e-49f9-b4e2-d315e09d845d.png)
